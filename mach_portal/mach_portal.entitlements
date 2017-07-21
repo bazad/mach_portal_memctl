@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.mach_portal</string>
+		<string>group.io.github.bazad.mach_portal</string>
 	</array>
 </dict>
 </plist>

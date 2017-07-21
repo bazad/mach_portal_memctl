@@ -14,7 +14,7 @@
 
 /* CHANGE ME */
 // change this to your unique app group id
-char* app_group = "group.mach_portal";
+char* app_group = "group.io.github.bazad.mach_portal";
 
 int jb_go() {
   // do platform detection

@@ -55,7 +55,7 @@ typedef struct __CodeDirectory {
   /* followed by dynamic content as located by offset fields above */
 } CS_CodeDirectory;
 
-size_t max_input_size = 20*1024*1024; // limit input binaries to 20MB
+size_t max_input_size = 120*1024*1024; // limit input binaries to 120MB
 
 // run time assertion, exits on failure
 void assert(int condition, char* failure_message) {
