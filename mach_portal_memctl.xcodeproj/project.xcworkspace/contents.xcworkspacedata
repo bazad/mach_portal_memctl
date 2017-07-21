@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:mach_portal.xcodeproj">
+      location = "self:mach_portal_memctl.xcodeproj">
    </FileRef>
 </Workspace>

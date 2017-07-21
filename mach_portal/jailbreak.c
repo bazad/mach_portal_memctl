@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "memctl/core.h"
+#include "memctl/memctl_error.h"
 
 #include "sandbox_escape.h"
 #include "kernel_sploit.h"
@@ -15,6 +17,15 @@
 /* CHANGE ME */
 // change this to your unique app group id
 char* app_group = "group.io.github.bazad.mach_portal";
+
+void memctl_warning(const char* fmt, ...) {
+  char buf[16 + strlen(fmt)];
+  snprintf(buf, sizeof(buf), "warning: %s\n", fmt);
+  va_list ap;
+  va_start(ap, fmt);
+  vprintf(buf, ap);
+  va_end(ap);
+}
 
 int jb_go() {
   // do platform detection
@@ -46,6 +57,7 @@ int jb_go() {
   printf("[+] got kernel task port!\n");
   printf("[+] kernel is at 0x%llx\n", kernel_base);
   
+  kernel_task = kernel_task_port;
   init_kernel_memory_helpers(kernel_task_port);
   
   // get root and leave the sandbox

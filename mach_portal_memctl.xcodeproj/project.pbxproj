@@ -39,7 +39,7 @@
 		B0CFD6371DEC438100B76CC3 /* patch_amfid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = patch_amfid.h; sourceTree = "<group>"; };
 		B0CFD63C1DEC751C00B76CC3 /* drop_payload.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = drop_payload.c; sourceTree = "<group>"; };
 		B0CFD63D1DEC751C00B76CC3 /* drop_payload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = drop_payload.h; sourceTree = "<group>"; };
-		B0FB96FC1DEB2C8600C0D3C4 /* mach_portal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mach_portal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0FB96FC1DEB2C8600C0D3C4 /* mach_portal_memctl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mach_portal_memctl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0FB96FF1DEB2C8600C0D3C4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B0FB97011DEB2C8600C0D3C4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		B0FB97041DEB2C8600C0D3C4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -81,7 +81,7 @@
 		B0FB96FD1DEB2C8600C0D3C4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B0FB96FC1DEB2C8600C0D3C4 /* mach_portal.app */,
+				B0FB96FC1DEB2C8600C0D3C4 /* mach_portal_memctl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,9 +125,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B0FB96FB1DEB2C8600C0D3C4 /* mach_portal */ = {
+		B0FB96FB1DEB2C8600C0D3C4 /* mach_portal_memctl */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B0FB970E1DEB2C8700C0D3C4 /* Build configuration list for PBXNativeTarget "mach_portal" */;
+			buildConfigurationList = B0FB970E1DEB2C8700C0D3C4 /* Build configuration list for PBXNativeTarget "mach_portal_memctl" */;
 			buildPhases = (
 				B0FB96F81DEB2C8600C0D3C4 /* Sources */,
 				B0FB96F91DEB2C8600C0D3C4 /* Frameworks */,
@@ -137,9 +137,9 @@
 			);
 			dependencies = (
 			);
-			name = mach_portal;
+			name = mach_portal_memctl;
 			productName = mach_portal;
-			productReference = B0FB96FC1DEB2C8600C0D3C4 /* mach_portal.app */;
+			productReference = B0FB96FC1DEB2C8600C0D3C4 /* mach_portal_memctl.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -165,7 +165,7 @@
 					};
 				};
 			};
-			buildConfigurationList = B0FB96F71DEB2C8600C0D3C4 /* Build configuration list for PBXProject "mach_portal" */;
+			buildConfigurationList = B0FB96F71DEB2C8600C0D3C4 /* Build configuration list for PBXProject "mach_portal_memctl" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -178,7 +178,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B0FB96FB1DEB2C8600C0D3C4 /* mach_portal */,
+				B0FB96FB1DEB2C8600C0D3C4 /* mach_portal_memctl */,
 			);
 		};
 /* End PBXProject section */
@@ -340,17 +340,23 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = mach_portal/mach_portal.entitlements;
 				DEVELOPMENT_TEAM = DEEG7TTSF2;
+				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = memctl/include;
 				INFOPLIST_FILE = mach_portal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				"OTHER_LDFLAGS[arch=*]" = (
+				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
+					"-force_load",
+					memctl/lib/libmemctl.a,
+					"-lcompression",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "io.github.bazad.mach-portal";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "mach_portal/mach_portal-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
+				VALID_ARCHS = arm64;
 			};
 			name = Debug;
 		};
@@ -361,23 +367,29 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = mach_portal/mach_portal.entitlements;
 				DEVELOPMENT_TEAM = DEEG7TTSF2;
+				ENABLE_BITCODE = NO;
+				HEADER_SEARCH_PATHS = memctl/include;
 				INFOPLIST_FILE = mach_portal/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				"OTHER_LDFLAGS[arch=*]" = (
+				OTHER_LDFLAGS = (
 					"-framework",
 					IOKit,
+					"-force_load",
+					memctl/lib/libmemctl.a,
+					"-lcompression",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "io.github.bazad.mach-portal";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "mach_portal/mach_portal-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
+				VALID_ARCHS = arm64;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B0FB96F71DEB2C8600C0D3C4 /* Build configuration list for PBXProject "mach_portal" */ = {
+		B0FB96F71DEB2C8600C0D3C4 /* Build configuration list for PBXProject "mach_portal_memctl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B0FB970C1DEB2C8700C0D3C4 /* Debug */,
@@ -386,7 +398,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B0FB970E1DEB2C8700C0D3C4 /* Build configuration list for PBXNativeTarget "mach_portal" */ = {
+		B0FB970E1DEB2C8700C0D3C4 /* Build configuration list for PBXNativeTarget "mach_portal_memctl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B0FB970F1DEB2C8700C0D3C4 /* Debug */,
