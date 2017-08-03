@@ -58,7 +58,6 @@ int jb_go() {
   printf("[+] kernel is at 0x%llx\n", kernel_base);
   
   kernel_task = kernel_task_port;
-  init_kernel_memory_helpers(kernel_task_port);
   
   // get root and leave the sandbox
   disable_protections(kernel_base, realhost, "mach_portal");

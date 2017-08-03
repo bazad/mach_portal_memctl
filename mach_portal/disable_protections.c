@@ -6,6 +6,8 @@
 
 #include <mach/mach.h>
 
+#include "memctl/core.h"
+
 #include "kernel_memory_helpers.h"
 #include "offsets.h"
 
@@ -198,7 +200,7 @@ void disable_protections(uint64_t kernel_base, uint64_t realhost, char* p_comm) 
   
   // while we're at it set the kernel task port as host special port 4 (an unused host special port)
   // so other tools can get at it via host_get_special_port on the host_priv port
-  uint64_t kernel_task_port_ptr = proc_port_name_to_port_ptr(our_proc, _kernel_task_port());
+  uint64_t kernel_task_port_ptr = proc_port_name_to_port_ptr(our_proc, kernel_task);
   wk64(realhost+0x30, kernel_task_port_ptr);
   printf("set the kernel task port as host special port 4\n");
 }

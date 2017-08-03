@@ -3,9 +3,6 @@
 
 #include <mach/mach.h>
 
-void init_kernel_memory_helpers(mach_port_t ktp);
-mach_port_t _kernel_task_port();
-
 uint64_t r64(mach_port_t tp, uint64_t addr);
 uint32_t r32(mach_port_t tp, uint64_t addr);
 void w8(mach_port_t tp, uint64_t addr, uint32_t val);

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "memctl/core.h"
+
 #include <mach/mach.h>
 
 kern_return_t mach_vm_read
@@ -26,16 +28,6 @@ kern_return_t mach_vm_deallocate
   mach_vm_address_t address,
   mach_vm_size_t size
 );
-
-mach_port_t kernel_task_port = MACH_PORT_NULL;
-
-void init_kernel_memory_helpers(mach_port_t ktp) {
-  kernel_task_port = ktp;
-}
-
-mach_port_t _kernel_task_port() {
-  return kernel_task_port;
-}
 
 /* read */
 
@@ -132,25 +124,25 @@ void w64(mach_port_t tp, uint64_t addr, uint64_t val) {
 /* wrappers with implict kernel task port argument */
 
 uint64_t rk64(uint64_t addr) {
-  return r64(kernel_task_port, addr);
+  return r64(kernel_task, addr);
 }
 
 uint32_t rk32(uint64_t addr) {
-  return r32(kernel_task_port, addr);
+  return r32(kernel_task, addr);
 }
 
 void* rkmem(uint64_t addr, uint64_t len) {
-  return rmem(kernel_task_port, addr, len);
+  return rmem(kernel_task, addr, len);
 }
 
 void wk8(uint64_t addr, uint8_t val) {
-  w8(kernel_task_port, addr, val);
+  w8(kernel_task, addr, val);
 }
 
 void wk32(uint64_t addr, uint32_t val) {
-  w32(kernel_task_port, addr, val);
+  w32(kernel_task, addr, val);
 }
 
 void wk64(uint64_t addr, uint64_t val) {
-  w64(kernel_task_port, addr, val);
+  w64(kernel_task, addr, val);
 }
