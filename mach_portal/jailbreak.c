@@ -83,7 +83,7 @@ int jb_go() {
   printf("[+] initialized libmemctl\n");
 
   // get root and leave the sandbox
-  disable_protections(kernel_base, realhost, "mach_portal");
+  disable_protections(kernel_base, realhost);
   
   // make our host port the priv one - this won't persist across an exec
   // but we fix that in disable_protections() later

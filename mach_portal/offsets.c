@@ -7,7 +7,6 @@
 
 // offsets from the main kernel 0xfeedfacf
 uint64_t allproc_offset;
-uint64_t kernproc_offset;
 
 // offsets in struct proc
 uint64_t struct_proc_p_pid_offset;
@@ -37,7 +36,6 @@ uint64_t struct_ipc_port_ip_kobject_offset;
 void init_ipad_mini_2_10_1_1_14b100() {
   printf("setting offsets for iPad mini 2 10.1.1\n");
   allproc_offset = 0x5A4128;
-  kernproc_offset = 0x5AA0E0;
 
   struct_proc_p_pid_offset = 0x10;
   struct_proc_task_offset = 0x18;
@@ -61,7 +59,6 @@ void init_ipad_mini_2_10_1_1_14b100() {
 void init_ipod_touch_6g_10_1_1_14b100() {
   printf("setting offsets for iPod touch 6G 10.1.1\n");
   allproc_offset = 0x5B4168;
-  kernproc_offset = 0x5BA0E0;
 
   struct_proc_p_pid_offset = 0x10;
   struct_proc_task_offset = 0x18;
@@ -85,7 +82,6 @@ void init_ipod_touch_6g_10_1_1_14b100() {
 void init_macos_10_12_1() {
   printf("setting offsets for MacOS 10.12.1\n");
   allproc_offset = 0x8bb490;
-  kernproc_offset = 0x8BA7D8;
   
   struct_proc_task_offset = 0x18;
   struct_proc_p_uthlist_offset = 0x98;
@@ -108,7 +104,6 @@ void init_macos_10_12_1() {
 void init_iphone_6s_10_1_1_14b100() {
   printf("setting offsets for iPhone 6s 10.1.1\n");
   allproc_offset = 0x5A4148;
-  kernproc_offset = 0x5AA0E0;
 
   struct_proc_p_pid_offset = 0x10;
   struct_proc_task_offset = 0x18;
@@ -132,7 +127,6 @@ void init_iphone_6s_10_1_1_14b100() {
 void init_iphone_7_10_1_1_14b100() {
   printf("setting offsets for iPhone 7 10.1.1\n");
   allproc_offset = 0x5EC178;
-  kernproc_offset = 0x5F20E0;
 
   struct_proc_p_pid_offset = 0x10;
   struct_proc_task_offset = 0x18;
