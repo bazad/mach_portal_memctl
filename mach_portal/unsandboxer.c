@@ -171,9 +171,7 @@ void start_bootstrap_unsandboxer() {
   mach_port_t fake_bootstrap = MACH_PORT_NULL;
   mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &fake_bootstrap);
   mach_port_insert_right(mach_task_self(), fake_bootstrap, fake_bootstrap, MACH_MSG_TYPE_MAKE_SEND);
-  
-  start_bootstrap_mitm_thread(real_bootstrap, fake_bootstrap);
-  
+
   // this will be inherited by all our child processes
   task_set_special_port(mach_task_self(), TASK_BOOTSTRAP_PORT, fake_bootstrap);
   start_bootstrap_mitm_thread(real_bootstrap, fake_bootstrap);

