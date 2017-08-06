@@ -1,127 +1,55 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "memctl/core.h"
-
-#include <mach/mach.h>
-
-kern_return_t mach_vm_read
-(
- vm_map_t target_task,
-  mach_vm_address_t address,
-  mach_vm_size_t size,
-  vm_offset_t *data,
-  mach_msg_type_number_t *dataCnt
-);
-
-kern_return_t mach_vm_write
-(
-  vm_map_t target_task,
-  mach_vm_address_t address,
-  vm_offset_t data,
-  mach_msg_type_number_t dataCnt
-);
-
-kern_return_t mach_vm_deallocate
-(
-  vm_map_t target,
-  mach_vm_address_t address,
-  mach_vm_size_t size
-);
+#include "memctl/task_memory.h"
 
 /* read */
 
 uint32_t r32(mach_port_t tp, uint64_t addr) {
-  kern_return_t err;
-  vm_offset_t buf = 0;
-  mach_msg_type_number_t num = 0;
-  err = mach_vm_read(tp,
-                     addr,
-                     4,
-                     &buf,
-                     &num);
-  if (err != KERN_SUCCESS) {
-    printf("read failed!\n");
-    return 0;
-  }
-  uint32_t val = *(uint32_t*)buf;
-  mach_vm_deallocate(mach_task_self(), buf, num);
-  return val;
+  uint32_t value;
+  task_io_result tr = task_read_word(task_read, tp, addr, &value, sizeof(value), 0);
+  assert(tr == TASK_IO_SUCCESS);
+  return value;
 }
 
 uint64_t r64(mach_port_t tp, uint64_t addr) {
-  kern_return_t err;
-  vm_offset_t buf = 0;
-  mach_msg_type_number_t num = 0;
-  err = mach_vm_read(tp,
-                     addr,
-                     8,
-                     &buf,
-                     &num);
-  if (err != KERN_SUCCESS){
-    printf("read failed!\n");
-    return 0;
-  }
-  uint64_t val = *(uint64_t*)buf;
-  mach_vm_deallocate(mach_task_self(), buf, num);
-  return val;
+  uint64_t value;
+  task_io_result tr = task_read_word(task_read, tp, addr, &value, sizeof(value), 0);
+  assert(tr == TASK_IO_SUCCESS);
+  return value;
 }
 
 void* rmem(mach_port_t tp, uint64_t addr, uint64_t len) {
-  kern_return_t err;
-  vm_offset_t buf = 0;
-  mach_msg_type_number_t num = 0;
-  err = mach_vm_read(tp,
-                     addr,
-                     len,
-                     &buf,
-                     &num);
-  if (err != KERN_SUCCESS) {
-    printf("read failed\n");
-    return NULL;
-  }
   uint8_t* outbuf = malloc(len);
-  memcpy(outbuf, (void*)buf, len);
-  mach_vm_deallocate(mach_task_self(), buf, num);
+  size_t size = len;
+  task_io_result tr = task_read(tp, addr, &size, outbuf, 0, NULL);
+  assert(tr == TASK_IO_SUCCESS);
   return outbuf;
 }
 
 /* write */
 
 void w8(mach_port_t tp, uint64_t addr, uint8_t val) {
-  kern_return_t err =
-  mach_vm_write(tp,
-                addr,
-                (vm_offset_t)&val,
-                1);
-  if (err != KERN_SUCCESS) {
-    printf("write failed\n");
-  }
+  task_io_result tr = task_write_word(task_write, tp, addr, val, sizeof(val), 0);
+  assert(tr == TASK_IO_SUCCESS);
 }
 
 void w32(mach_port_t tp, uint64_t addr, uint32_t val) {
-  kern_return_t err =
-  mach_vm_write(tp,
-                addr,
-                (vm_offset_t)&val,
-                4);
-  if (err != KERN_SUCCESS) {
-    printf("write failed\n");
-  }
+  task_io_result tr = task_write_word(task_write, tp, addr, val, sizeof(val), 0);
+  assert(tr == TASK_IO_SUCCESS);
 }
 
 void w64(mach_port_t tp, uint64_t addr, uint64_t val) {
-  kern_return_t err =
-  mach_vm_write(tp,
-                addr,
-                (vm_offset_t)&val,
-                8);
-  if (err != KERN_SUCCESS) {
-    printf("write failed\n");
-  }
+  task_io_result tr = task_write_word(task_write, tp, addr, val, sizeof(val), 0);
+  assert(tr == TASK_IO_SUCCESS);
 }
 
 /* wrappers with implict kernel task port argument */
+
+// NOTE: It would be better to use the kernel_memory.h functions here, but mach_portal doesn't
+// really need it.
 
 uint64_t rk64(uint64_t addr) {
   return r64(kernel_task, addr);
