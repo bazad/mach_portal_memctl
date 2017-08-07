@@ -104,7 +104,7 @@ void fix_launchd_after_sandbox_escape(mach_port_t real_service, mach_port_t mitm
 #define AMFID             "/usr/libexec/amfid"
 #define CONTAINERMANAGERD "/System/Library/PrivateFrameworks/MobileContainerManager.framework/Support/containermanagerd"
 
-void disable_protections(uint64_t kernel_base, uint64_t realhost) {
+void disable_protections(uint64_t realhost) {
   // Give ourselves the kernel credentials so that we can find processes.
   bool success = proc_copy_credentials(currentproc, kernproc);
   assert(success);
