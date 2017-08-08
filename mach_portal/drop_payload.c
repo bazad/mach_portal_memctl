@@ -133,7 +133,7 @@ void do_bind_shell(char* env, int port) {
   char* shell_path = NULL;
   asprintf(&shell_path, "%s/iosbinpack64/bin/bash", bundle_root);
   
-  char* argv[] = {shell_path, NULL};
+  char* argv[] = {shell_path, "-i", NULL};
   char* envp[] = {env, NULL};
   
   struct sockaddr_in sa;
