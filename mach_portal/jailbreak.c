@@ -82,7 +82,7 @@ int jb_go() {
   printf("[+] initialized libmemctl\n");
 
   // get root and leave the sandbox
-  disable_protections(realhost);
+  disable_protections(host_priv_port, realhost);
   
   // make our host port the priv one - this won't persist across an exec
   // but we fix that in disable_protections() later

