@@ -32,13 +32,6 @@ uint64_t get_proc_ipc_table(uint64_t proc) {
   return is_table;
 }
 
-uint64_t proc_port_name_to_port_ptr(uint64_t proc, mach_port_name_t port_name) {
-  uint64_t ports = get_proc_ipc_table(proc);
-  uint32_t port_index = port_name >> 8;
-  uint64_t port = rk64(ports + (0x18*port_index)); //ie_object
-  return port;
-}
-
 mach_port_t get_amfid_task_port() {
   mach_port_t amfid_task_port;
   bool success = proc_to_task_port(&amfid_task_port, amfid_proc);
