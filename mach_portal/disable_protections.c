@@ -22,10 +22,12 @@ uint64_t get_proc_ipc_table(uint64_t proc) {
   bool success = proc_task(&task_t, proc);
   assert(success);
   printf("task_t: 0x%llx\n", task_t);
-  
-  uint64_t itk_space = rk64(task_t + struct_task_itk_space_offset);
+
+  uint64_t itk_space;
+  success = get_task_ipcspace(&itk_space, task_t);
+  assert(success);
   printf("itk_space: 0x%llx\n", itk_space);
-  
+
   uint64_t is_table = rk64(itk_space + struct_ipc_space_is_table_offset);
   printf("is_table: 0x%llx\n", is_table);
   

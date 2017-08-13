@@ -1,9 +1,6 @@
 #ifndef offsets_h
 #define offsets_h
 
-// offsets in struct task
-extern uint64_t struct_task_itk_space_offset;
-
 // offsets in struct ipc_space
 extern uint64_t struct_ipc_space_is_table_offset;
 

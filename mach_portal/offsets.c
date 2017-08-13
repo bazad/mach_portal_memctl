@@ -5,9 +5,6 @@
 
 #include "offsets.h"
 
-// offsets in struct task
-uint64_t struct_task_itk_space_offset;
-
 // offsets in struct ipc_space
 uint64_t struct_ipc_space_is_table_offset;
 
@@ -15,15 +12,11 @@ uint64_t struct_ipc_space_is_table_offset;
 void init_ipad_mini_2_10_1_1_14b100() {
   printf("setting offsets for iPad mini 2 10.1.1\n");
 
-  struct_task_itk_space_offset = 0x300;
-
   struct_ipc_space_is_table_offset = 0x20;
 }
 
 void init_ipod_touch_6g_10_1_1_14b100() {
   printf("setting offsets for iPod touch 6G 10.1.1\n");
-
-  struct_task_itk_space_offset = 0x300;
 
   struct_ipc_space_is_table_offset = 0x20;
 }
@@ -31,23 +24,17 @@ void init_ipod_touch_6g_10_1_1_14b100() {
 void init_macos_10_12_1() {
   printf("setting offsets for MacOS 10.12.1\n");
 
-  struct_task_itk_space_offset = 0x300;
-
   struct_ipc_space_is_table_offset = 0x18;
 }
 
 void init_iphone_6s_10_1_1_14b100() {
   printf("setting offsets for iPhone 6s 10.1.1\n");
 
-  struct_task_itk_space_offset = 0x300;
-
   struct_ipc_space_is_table_offset = 0x20;
 }
 
 void init_iphone_7_10_1_1_14b100() {
   printf("setting offsets for iPhone 7 10.1.1\n");
-
-  struct_task_itk_space_offset = 0x300;
 
   struct_ipc_space_is_table_offset = 0x20;
 }
