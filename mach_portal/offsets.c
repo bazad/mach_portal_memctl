@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
-#include <sys/utsname.h>
+
+#include "memctl/platform.h"
 
 #include "offsets.h"
 
@@ -44,24 +45,13 @@ void unknown_build() {
 }
 
 void init_offsets() {
-  struct utsname u = {0};
-  int err = uname(&u);
-  if (err == -1) {
-    printf("uname failed - what platform is this?\n");
-    printf("there's no way this will work, but trying anyway!\n");
-    init_ipad_mini_2_10_1_1_14b100();
-    return;
-  }
+  printf("release: %u.%u.%u\n", platform.release.major, platform.release.minor, platform.release.patch);
+  printf("version: %s\n", platform.version);
+  printf("machine: %s\n", platform.machine);
 
-  printf("sysname: %s\n", u.sysname);
-  printf("nodename: %s\n", u.nodename);
-  printf("release: %s\n", u.release);
-  printf("version: %s\n", u.version);
-  printf("machine: %s\n", u.machine);
-
-  if (strstr(u.machine, "iPod7,1")) {
+  if (strstr(platform.machine, "iPod7,1")) {
     // this is an iPod 6G
-    if (strstr(u.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_T7000")) {
+    if (strstr(platform.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_T7000")) {
       printf("this is a known kernel build for iPod touch 6G - offsets should be okay\n");
     } else {
       unknown_build();
@@ -69,9 +59,9 @@ void init_offsets() {
     init_ipod_touch_6g_10_1_1_14b100();
     return;
   }
-  if (strstr(u.machine, "iPad4,4")) {
+  if (strstr(platform.machine, "iPad4,4")) {
     // this is an iPad mini 2
-    if (strstr(u.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_S5L8960X")){
+    if (strstr(platform.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_S5L8960X")){
       printf("this is a known kernel build for iPad mini 2 - offsets should be okay\n");
     } else {
       unknown_build();
@@ -79,9 +69,9 @@ void init_offsets() {
     init_ipad_mini_2_10_1_1_14b100();
     return;
   }
-  if (strstr(u.machine, "iPhone8,1")) {
+  if (strstr(platform.machine, "iPhone8,1")) {
     // this is an iPhone 6s
-    if (strstr(u.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_S8000")) {
+    if (strstr(platform.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_S8000")) {
         printf("this is a known kernel build for iPhone 6s - offsets should be okay\n");
     } else {
         unknown_build();
@@ -89,9 +79,9 @@ void init_offsets() {
     init_iphone_6s_10_1_1_14b100();
     return;
   }
-  if (strstr(u.machine, "iPhone9,1")) {
+  if (strstr(platform.machine, "iPhone9,1")) {
     // this is an iPhone 7
-    if (strstr(u.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_T8010")) {
+    if (strstr(platform.version, "root:xnu-3789.22.3~1/RELEASE_ARM64_T8010")) {
         printf("this is a known kernel build for iPhone 7 - offsets should be okay\n");
     } else {
         unknown_build();

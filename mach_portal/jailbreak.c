@@ -36,8 +36,9 @@ void memctl_warning(const char* fmt, ...) {
 
 int jb_go() {
   // do platform detection
+  platform_init();
   init_offsets();
-  
+
   // exploit the urefs saturation bug; target launchd to impersonate a service
   // and get the task port for a root service and use that to get the host_priv port
   // which we need to trigger the kernel bug
@@ -65,7 +66,6 @@ int jb_go() {
   // Initialize libmemctl.
   kernel_task = kernel_task_port;
   bool success;
-  platform_init();
   kernel_memory_init();
   success = kernel_init(NULL);
   assert(success);
