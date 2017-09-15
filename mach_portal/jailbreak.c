@@ -67,9 +67,9 @@ int jb_go() {
   kernel_task = kernel_task_port;
   bool success;
   kernel_memory_init();
+  kernel_symbol_finders_init();
   success = kernel_init(NULL);
   assert(success);
-  kernel_symbol_finders_init();
   success = kernel_slide_init();
   assert(success);
   success = kernel_init(NULL);
